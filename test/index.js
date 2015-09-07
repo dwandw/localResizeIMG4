@@ -1,3 +1,18 @@
+window.onerror = function (errMsg, scriptURI, lineNumber, columnNumber, errorObj) {
+    setTimeout(function () {
+        var rst = {
+            "错误信息：": errMsg,
+            "出错文件：": scriptURI,
+            "出错行号：": lineNumber,
+            "出错列号：": columnNumber,
+            "错误详情：": errorObj
+        };
+
+        alert('出错了，下一步将显示错误信息');
+        alert(JSON.stringify(rst, null, 10));
+    });
+};
+
 [].forEach.call(document.querySelectorAll('[data-src]'), function (el) {
     (function (el) {
         el.addEventListener('click', function () {
@@ -26,13 +41,14 @@ document.querySelector('input').addEventListener('change', function () {
                 div        = document.createElement('div'),
                 p          = document.createElement('p'),
                 sourceSize = toFixed2(that.files[0].size / 1024),
-                resultSize = toFixed2(rst.base64Len * 0.8 / 1024),
+                resultSize = toFixed2(rst.base64Len / 1024),
                 scale      = parseInt(100 - (resultSize / sourceSize * 100));
 
             p.style.fontSize = 13 + 'px';
             p.innerHTML      = '源文件：<span class="text-danger">' +
                 sourceSize + 'KB' +
-                '</span>，压缩后<span class="text-success">' +
+                '</span> <br />' +
+                '压缩后传输Base64：<span class="text-success">' +
                 resultSize + 'KB (省' + scale + '%)' +
                 '</span> ';
 
@@ -51,10 +67,29 @@ document.querySelector('input').addEventListener('change', function () {
 });
 
 document.querySelector('#version').innerHTML = lrz.version;
+document.querySelector('.UA').innerHTML      = 'UA: ' + navigator.userAgent;
 
 function toFixed2 (num) {
     return parseFloat(+num.toFixed(2));
 }
+
+/**
+ * 替换字符串 !{}
+ * @param obj
+ * @returns {String}
+ * @example
+ * '我是!{str}'.render({str: '测试'});
+ */
+String.prototype.render = function (obj) {
+    var str = this, reg;
+
+    Object.keys(obj).forEach(function (v) {
+        reg = new RegExp('\\!\\{' + v + '\\}', 'g');
+        str = str.replace(reg, obj[v]);
+    });
+
+    return str;
+};
 
 /**
  *

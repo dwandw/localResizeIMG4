@@ -1,3 +1,5 @@
+var path = require('path');
+
 var paths = {
     src : './src',
     dist: './dist'
@@ -5,7 +7,8 @@ var paths = {
 
 module.exports = {
     entry: {
-        lrz: paths.src + '/lrz'
+        lrz      : paths.src + '/lrz',
+        'lrz.all': paths.src + '/lrz.all'
     },
 
     output: {
@@ -20,4 +23,5 @@ module.exports = {
             paths.src + '/lib'
         ]
     }
-};
+}
+;

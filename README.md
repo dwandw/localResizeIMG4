@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/think2011/localResizeIMG4.svg?branch=master)](https://travis-ci.org/think2011/localResizeIMG4)
+[![npm version](https://img.shields.io/npm/v/lrz.svg)](https://www.npmjs.com/package/lrz)
+[![npm](https://img.shields.io/npm/l/express.svg)]()
+
 # 演示一下
 
 ![](http://think2011.github.io/localResizeIMG4/test/demo.gif)
@@ -24,8 +28,9 @@
 通过以下方式都可以下载：
 
 1. 执行`npm i lrz`（推荐）
-2. 或者 `git clone`本库
-3. 要么 在页面右侧点击`download zip`
+2. 执行`bower install lrz`
+3. 或者 `git clone`本库
+4. 要么 在页面右侧点击`download zip`
 
 接着在页面中引入
 ```html
@@ -94,7 +99,13 @@ IE9以上及大部分非IE浏览器（chrome、微信什么的）
 
 # FAQ
 
-[有疑问请直接在 issues 中提问 🙈](https://github.com/think2011/localResizeIMG4/issues)
+[有疑问请直接在 issues 中提问 🙈](https://github.com/think2011/localResizeIMG4/issues)，顺便附上以下内容吧：
+
+```
+平台：微信..
+设备：iPhone5 IOS7..
+问题：问题描述呗..
+```
 
 * Q：有时拍摄完照片后，页面自动刷新或闪退了。
 * A：虽然已作了优化处理，但内存似乎还是爆掉了，常见于低配android手机。

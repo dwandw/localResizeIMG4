@@ -1,32 +1,27 @@
 // 保证按需加载的文件路径正确
-__webpack_public_path__ = getCurrentJsDir() + '/';
+__webpack_public_path__ = getJsDir('lrz') + '/';
 window.URL              = window.URL || window.webkitURL;
 
 var Promise = require('Promise'),
     exif    = require('exif');
 
 
-// 判断设备是否是IOS7以下
-var isOldIOS = (function (userAgent) {
-    var rst = /OS (\d)_.* like Mac OS X/g.exec(userAgent);
+var UA = (function (userAgent) {
+    var ISOldIOS     = /OS (\d)_.* like Mac OS X/g.exec(userAgent),
+        isOldAndroid = /Android (\d.*?);/g.exec(userAgent) || /Android\/(\d.*?) /g.exec(userAgent);
 
-    if (rst === null) return false;
-
-    return +rst.pop() < 8;
-})(navigator.userAgent);
-
-// 判断设备是否是android4.5以下
-var isOldAndroid = (function (userAgent) {
-    var rst = /Android (\d.*?);/g.exec(userAgent);
-
-    if (rst === null) return false;
-
-    return +(rst.pop().substr(0, 3)) < 4.5;
-})(navigator.userAgent);
-
-// 判断是否QQ浏览器
-var isMQQBrowser = (function (userAgent) {
-    return /MQQBrowser/g.test(userAgent);
+    // 判断设备是否是IOS7以下
+    // 判断设备是否是android4.5以下
+    // 判断是否iOS
+    // 判断是否android
+    // 判断是否QQ浏览器
+    return {
+        oldIOS    : ISOldIOS ? +ISOldIOS.pop() < 8 : false,
+        oldAndroid: isOldAndroid ? +isOldAndroid.pop().substr(0, 3) < 4.5 : false,
+        iOS       : /\(i[^;]+;( U;)? CPU.+Mac OS X/.test(userAgent),
+        android   : /Android/g.test(userAgent),
+        mQQBrowser: /MQQBrowser/g.test(userAgent)
+    }
 })(navigator.userAgent);
 
 function Lrz (file, opts) {
@@ -66,7 +61,6 @@ Lrz.prototype.init = function () {
     if (!document.createElement('canvas').getContext) {
         throw new Error('浏览器不支持canvas');
     }
-
     return new Promise(function (resolve, reject) {
         img.onerror = function () {
             throw new Error('加载图片文件失败');
@@ -105,13 +99,19 @@ Lrz.prototype.init = function () {
 Lrz.prototype._getBase64 = function () {
     var that   = this,
         img    = that.img,
+        file   = that.file,
         canvas = that.canvas;
 
+    var setCanvas = function () {
+    };
+
     return new Promise(function (resolve) {
-        exif.getData(img, function () {
+        // 传入blob在android4.3以下有bug
+        exif.getData(typeof file === 'object' ? file : img, function () {
             that.orientation = exif.getTag(this, "Orientation");
-            that.resize      = that._getResize();
-            that.ctx         = canvas.getContext('2d');
+
+            that.resize = that._getResize();
+            that.ctx    = canvas.getContext('2d');
 
             canvas.width  = that.resize.width;
             canvas.height = that.resize.height;
@@ -120,18 +120,23 @@ Lrz.prototype._getBase64 = function () {
             that.ctx.fillStyle = '#fff';
             that.ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 根据设备进行不同处理
-            isOldIOS
-                ? that._createBase64ForOldIOS().then(resolve)
-                : that._createBase64().then(resolve);
+            // 根据设备对应处理方式
+            if (UA.oldIOS) {
+                that._createBase64ForOldIOS().then(resolve);
+            }
+            else {
+                that._createBase64().then(resolve);
+            }
         });
     });
 };
+
 
 Lrz.prototype._createBase64ForOldIOS = function () {
     var that        = this,
         img         = that.img,
         canvas      = that.canvas,
+        defaults    = that.defaults,
         orientation = that.orientation;
 
     return new Promise(function (resolve) {
@@ -152,7 +157,7 @@ Lrz.prototype._createBase64ForOldIOS = function () {
                 });
             }
 
-            resolve(canvas.toDataURL('image/jpeg', that.defaults.quality));
+            resolve(canvas.toDataURL('image/jpeg', defaults.quality));
         });
     });
 };
@@ -210,7 +215,7 @@ Lrz.prototype._createBase64 = function () {
     }
 
     return new Promise(function (resolve) {
-        if (isOldAndroid || isMQQBrowser) {
+        if (UA.oldAndroid || UA.mQQBrowser || !navigator.userAgent) {
             require(['jpeg_encoder_basic'], function (JPEGEncoder) {
                 var encoder = new JPEGEncoder(),
                     img     = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -237,7 +242,7 @@ Lrz.prototype._getResize = function () {
         height: img.height
     };
 
-    if ("5678".indexOf(orientation) > -1) {
+    if (orientation && ("5678".indexOf(orientation) > -1)) {
         ret.width  = img.height;
         ret.height = img.width;
     }
@@ -283,10 +288,20 @@ Lrz.prototype._getResize = function () {
  * 获取当前js文件所在路径，必须得在代码顶部执行此函数
  * @returns {string}
  */
-function getCurrentJsDir () {
-    var src = document.scripts[document.scripts.length - 1].src;
+function getJsDir (src) {
+    var script = null;
 
-    return src.substr(0, src.lastIndexOf('/'));
+    if (src) {
+        script = [].filter.call(document.scripts, function (v) {
+            return v.src.indexOf(src) !== -1;
+        })[0];
+    } else {
+        script = document.scripts[document.scripts.length - 1];
+    }
+
+    if (!script) return null;
+
+    return script.src.substr(0, script.src.lastIndexOf('/'));
 }
 
 window.lrz = function (file, opts) {
@@ -319,3 +334,5 @@ module.exports = window.lrz;
  * 　　　　　┗┻┛　┗┻┛
  *
  */
+
+

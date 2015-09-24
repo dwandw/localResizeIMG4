@@ -45,7 +45,7 @@
 如果您的图片来自用户拍摄或者上传的，您需要一个`input file`来获取图片。
 
 ```html
-<input onchange="upload()" type="file" capture="camera" />
+<input onchange="upload()" type="file" accept="image/*" />
 ```
 
 接着通过change事件可以得到用户选择的图片
@@ -121,7 +121,7 @@ IE9以上及大部分非IE浏览器（chrome、微信什么的）
 
 # 开发
 
-[想要参与|定制|了解源码请点击这里](https://github.com/think2011/localResizeIMG4/wiki/%E5%BC%80%E5%8F%91)
+[想要参与 or 自己定制 or 了解源码请点击这里，逻辑和说明](https://github.com/think2011/localResizeIMG4/wiki/%E5%BC%80%E5%8F%91)
 
 # 感谢
 

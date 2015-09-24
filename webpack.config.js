@@ -1,4 +1,5 @@
-var path = require('path');
+var path    = require('path');
+var webpack = require("webpack");
 
 var paths = {
     src : './src',
@@ -12,7 +13,6 @@ module.exports = {
     },
 
     output: {
-        publicPath   : paths.dist + '/',
         filename     : "[name].bundle.js",
         chunkFilename: "[name].chunk.js"
     },
@@ -23,5 +23,4 @@ module.exports = {
             paths.src + '/lib'
         ]
     }
-}
-;
+};
